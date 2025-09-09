@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Endless Car Dodge</title>
     <style>
+        /* Your CSS remains the same */
         * {
             margin: 0;
             padding: 0;
@@ -27,14 +28,1183 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 5px;
         }
         
         #game-container {
             position: relative;
             width: 100%;
             max-width: 400px;
-            height: 80vh;
+            height: 90vh;
+            max-height: 800px;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        #game-canvas {
+            background: #0f1923;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10;
+            padding: 20px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px #ff4da6;
+            color: #fff;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #ffcc00;
+            text-align: center;
+        }
+        
+        .btn {
+            background: linear-gradient(to bottom, #ff6b6b, #ff3838);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            margin: 10px;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 5px 15px rgba(255, 56, 56, 0.4);
+            transition: all 0.2s;
+            font-weight: bold;
+            width: 200px;
+            text-align: center;
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(255, 56, 56, 0.6);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to bottom, #3498db, #2980b9);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        #score-display {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 5px #000;
+            pointer-events: none;
+        }
+        
+        #high-score-display {
+            position: absolute;
+            top: 45px;
+            left: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 5px #000;
+            pointer-events: none;
+        }
+        
+        #coins-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 5px #000;
+            pointer-events: none;
+        }
+        
+        #speed-display {
+            position: absolute;
+            bottom: 80px;
+            left: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 5px #000;
+            pointer-events: none;
+        }
+        
+        #car-display {
+            position: absolute;
+            bottom: 110px;
+            left: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-shadow: 0 0 5px #000;
+            pointer-events: none;
+        }
+        
+        #accelerator-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        #accelerator-btn {
+            pointer-events: auto;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: linear-gradient(to bottom, #27ae60, #219653);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+            color: white;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        #pause-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1rem;
+            z-index: 20;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .instructions {
+            max-width: 300px;
+            text-align: center;
+            margin: 20px 0;
+            line-height: 1.5;
+            color: #ddd;
+            font-size: 1rem;
+        }
+        
+        .coin-animation {
+            position: absolute;
+            animation: coinFloat 1s ease-out;
+            font-size: 1.5rem;
+            color: gold;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        @keyframes coinFloat {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+        
+        #garage-btn {
+            background: linear-gradient(to bottom, #9b59b6, #8e44ad);
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.4);
+        }
+        
+        #back-btn {
+            margin-top: 20px;
+        }
+        
+        .car-option {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
+            cursor: pointer;
+        }
+        
+        .car-option.unlocked {
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        .car-option.selected {
+            background: rgba(0, 100, 255, 0.2);
+            border: 2px solid #3498db;
+        }
+        
+        .car-preview {
+            width: 50px;
+            height: 30px;
+            margin-right: 15px;
+            border-radius: 5px;
+        }
+        
+        .car-name {
+            flex-grow: 1;
+            font-size: 1.1rem;
+        }
+        
+        .car-price {
+            background: gold;
+            color: black;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .locked {
+            opacity: 0.6;
+        }
+        
+        .swipe-indicator {
+            position: absolute;
+            bottom: 140px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #aaa;
+            pointer-events: none;
+        }
+        
+        .game-over-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .stats-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: #ccc;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #ffcc00;
+        }
+        
+        .car-ability {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        
+        .purchase-feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 100;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        
+        <div id="ui-overlay">
+            <div id="score-display">Score: 0</div>
+            <div id="high-score-display">High: 0</div>
+            <div id="coins-display">Coins: 0</div>
+            <div id="speed-display">Speed: 0 km/h</div>
+            <div id="car-display">Car: Dodge Challenger</div>
+            <button id="pause-btn">⏸️</button>
+            
+            <div class="swipe-indicator">Swipe left/right to move</div>
+            
+            <div id="accelerator-container">
+                <button id="accelerator-btn">⏩</button>
+            </div>
+        </div>
+        
+        <div id="start-screen" class="screen">
+            <h1>ENDLESS CAR DODGE</h1>
+            <div class="instructions">
+                Swipe left/right to move. Hold accelerator to go faster. Dodge cars and collect coins!
+            </div>
+            <button id="start-btn" class="btn">START GAME</button>
+            <button id="garage-btn" class="btn">GARAGE</button>
+        </div>
+        
+        <div id="pause-screen" class="screen hidden">
+            <h2>GAME PAUSED</h2>
+            <button id="resume-btn" class="btn">RESUME</button>
+            <button id="restart-btn" class="btn btn-secondary">RESTART</button>
+        </div>
+        
+        <div id="gameover-screen" class="screen hidden">
+            <h2>GAME OVER</h2>
+            <div class="stats-container">
+                <div class="stat-row">
+                    <span class="stat-label">Score:</span>
+                    <span class="stat-value" id="final-score">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">High Score:</span>
+                    <span class="stat-value" id="final-high-score">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Speed Record:</span>
+                    <span class="stat-value" id="speed-record">0 km/h</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Coins Collected:</span>
+                    <span class="stat-value" id="coins-collected">0</span>
+                </div>
+            </div>
+            <div class="game-over-buttons">
+                <button id="playagain-btn" class="btn">PLAY AGAIN</button>
+                <button id="garage-after-game" class="btn btn-secondary">GARAGE</button>
+            </div>
+        </div>
+        
+        <div id="garage-screen" class="screen hidden">
+            <h2>CAR GARAGE</h2>
+            <div id="car-selection">
+                <div class="car-option selected" data-car="dodge">
+                    <div class="car-preview" style="background-color: #FF0000;"></div>
+                    <div class="car-info">
+                        <div class="car-name">Dodge Challenger</div>
+                        <div class="car-ability">Top Speed: 315 km/h • Score: 1x</div>
+                    </div>
+                    <div class="car-price">OWNED</div>
+                </div>
+                <div class="car-option locked" data-car="lamborghini">
+                    <div class="car-preview" style="background-color: #FF9900;"></div>
+                    <div class="car-info">
+                        <div class="car-name">Lamborghini</div>
+                        <div class="car-ability">Top Speed: 350 km/h • Score: 2x</div>
+                    </div>
+                    <div class="car-price">500 coins</div>
+                </div>
+                <div class="car-option locked" data-car="f1">
+                    <div class="car-preview" style="background-color: #FFFFFF;"></div>
+                    <div class="car-info">
+                        <div class="car-name">F1 Racer</div>
+                        <div class="car-ability">Top Speed: 380 km/h • Score: 4x</div>
+                    </div>
+                    <div class="car-price">1000 coins</div>
+                </div>
+            </div>
+            <button id="back-btn" class="btn">BACK</button>
+        </div>
+        
+        <div id="purchase-feedback" class="purchase-feedback hidden">
+            <h3>Car Purchased!</h3>
+            <p>You've unlocked a new vehicle</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game canvas and context
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // UI elements
+            const startScreen = document.getElementById('start-screen');
+            const pauseScreen = document.getElementById('pause-screen');
+            const gameoverScreen = document.getElementById('gameover-screen');
+            const garageScreen = document.getElementById('garage-screen');
+            const scoreDisplay = document.getElementById('score-display');
+            const highScoreDisplay = document.getElementById('high-score-display');
+            const coinsDisplay = document.getElementById('coins-display');
+            const speedDisplay = document.getElementById('speed-display');
+            const carDisplay = document.getElementById('car-display');
+            const finalScore = document.getElementById('final-score');
+            const finalHighScore = document.getElementById('final-high-score');
+            const speedRecord = document.getElementById('speed-record');
+            const coinsCollected = document.getElementById('coins-collected');
+            const purchaseFeedback = document.getElementById('purchase-feedback');
+            
+            // Buttons
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resumeBtn = document.getElementById('resume-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const playagainBtn = document.getElementById('playagain-btn');
+            const garageBtn = document.getElementById('garage-btn');
+            const garageAfterGameBtn = document.getElementById('garage-after-game');
+            const backBtn = document.getElementById('back-btn');
+            const acceleratorBtn = document.getElementById('accelerator-btn');
+            
+            // Game variables
+            let gameRunning = false;
+            let gamePaused = false;
+            let score = 0;
+            let highScore = parseInt(localStorage.getItem('highScore')) || 0;
+            let maxSpeedRecord = parseInt(localStorage.getItem('maxSpeedRecord')) || 0;
+            let coins = parseInt(localStorage.getItem('coins')) || 0;
+            let currentCar = localStorage.getItem('currentCar') || 'dodge';
+            let speed = 0;
+            let acceleration = 0;
+            let roadSpeed = 2;
+            let playerX = 0;
+            let playerY = 0;
+            let playerWidth = 40;
+            let playerHeight = 70;
+            let roadMarkings = [];
+            let obstacles = [];
+            let coinItems = [];
+            let animationId = null;
+            let lastTimestamp = 0;
+            let touchStartX = 0;
+            let touchStartY = 0;
+            
+            // Car specifications
+            const carSpecs = {
+                'dodge': { 
+                    topSpeed: 315, 
+                    scoreMultiplier: 1, 
+                    acceleration: 0.5,
+                    color: '#FF0000',
+                    name: 'Dodge Challenger'
+                },
+                'lamborghini': { 
+                    topSpeed: 350, 
+                    scoreMultiplier: 2, 
+                    acceleration: 0.7,
+                    color: '#FF9900',
+                    name: 'Lamborghini',
+                    price: 500
+                },
+                'f1': { 
+                    topSpeed: 380, 
+                    scoreMultiplier: 4, 
+                    acceleration: 1.0,
+                    color: '#FFFFFF',
+                    name: 'F1 Racer',
+                    price: 1000
+                }
+            };
+            
+            // Set canvas size to match container
+            function resizeCanvas() {
+                canvas.width = canvas.clientWidth;
+                canvas.height = canvas.clientHeight;
+                
+                // Position player car higher up from the bottom
+                playerX = canvas.width / 2 - playerWidth / 2;
+                playerY = canvas.height - playerHeight - 50; // Increased from 20 to 50
+            }
+            
+            // Initialize game
+            function initGame() {
+                resizeCanvas();
+                score = 0;
+                speed = 20/20; // Start at minimum speed of 20 km/h (scaled)
+                acceleration = 0;
+                roadSpeed = 2;
+                roadMarkings = [];
+                obstacles = [];
+                coinItems = [];
+                
+                // Initialize road markings with proper spacing
+                const markingHeight = 30;
+                const markingGap = 60;
+                const totalMarkings = Math.ceil(canvas.height / (markingHeight + markingGap)) + 2;
+                for (let i = 0; i < totalMarkings; i++) {
+                    roadMarkings.push({
+                        x: canvas.width / 2 - 2,
+                        y: i * (markingHeight + markingGap) - markingHeight,
+                        width: 4,
+                        height: markingHeight
+                    });
+                }
+                
+                updateScore();
+                updateCarDisplay();
+            }
+            
+            // Update car display
+            function updateCarDisplay() {
+                carDisplay.textContent = `Car: ${carSpecs[currentCar].name}`;
+            }
+            
+            // Draw road with properly spaced markings
+            function drawRoad() {
+                // Draw road
+                ctx.fillStyle = '#2c3e50';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw road markings
+                ctx.fillStyle = '#ffffff';
+                for (const marking of roadMarkings) {
+                    ctx.fillRect(marking.x, marking.y, marking.width, marking.height);
+                }
+            }
+            
+            // Draw player car
+            function drawPlayerCar() {
+                if (currentCar === 'f1') {
+                    drawF1Car(playerX, playerY, playerWidth, playerHeight);
+                } else {
+                    drawRegularCar(playerX, playerY, playerWidth, playerHeight, currentCar);
+                }
+            }
+            
+            // Draw regular car (Dodge or Lamborghini)
+            function drawRegularCar(x, y, width, height, type) {
+                const color = carSpecs[type].color;
+                
+                // Car body with gradient for realism
+                const gradient = ctx.createLinearGradient(x, y, x, y + height);
+                gradient.addColorStop(0, lightenColor(color, 30));
+                gradient.addColorStop(1, darkenColor(color, 20));
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, width, height);
+                
+                // Car roof
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(x + 6, y + 4, width - 12, 12);
+                
+                // Windshield
+                ctx.fillStyle = '#aaccff';
+                ctx.fillRect(x + 8, y + 6, width - 16, 8);
+                
+                // Side windows
+                ctx.fillStyle = '#334455';
+                ctx.fillRect(x + 4, y + 20, 6, 20);
+                ctx.fillRect(x + width - 10, y + 20, 6, 20);
+                
+                // Headlights
+                ctx.fillStyle = '#ffffcc';
+                ctx.fillRect(x + 6, y, 8, 4);
+                ctx.fillRect(x + width - 14, y, 8, 4);
+                
+                // Grille
+                ctx.fillStyle = '#333333';
+                ctx.fillRect(x + 14, y, width - 28, 4);
+                
+                // Taillights
+                ctx.fillStyle = '#ff3333';
+                ctx.fillRect(x + 4, y + height - 4, 8, 4);
+                ctx.fillRect(x + width - 12, y + height - 4, 8, 4);
+                
+                // Tires
+                ctx.fillStyle = '#222222';
+                ctx.fillRect(x - 4, y + 12, 6, 18);
+                ctx.fillRect(x - 4, y + height - 30, 6, 18);
+                ctx.fillRect(x + width - 2, y + 12, 6, 18);
+                ctx.fillRect(x + width - 2, y + height - 30, 6, 18);
+                
+                // Rims
+                ctx.fillStyle = '#cccccc';
+                ctx.fillRect(x - 2, y + 16, 2, 10);
+                ctx.fillRect(x - 2, y + height - 26, 2, 10);
+                ctx.fillRect(x + width, y + 16, 2, 10);
+                ctx.fillRect(x + width, y + height - 26, 2, 10);
+            }
+            
+            // Draw F1 car (triangular shape)
+            function drawF1Car(x, y, width, height) {
+                // Main body (triangular shape)
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.moveTo(x + width/2, y);
+                ctx.lineTo(x + width - 10, y + height);
+                ctx.lineTo(x + 10, y + height);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Front wing
+                ctx.fillStyle = '#FF0000';
+                ctx.fillRect(x, y + height - 5, width, 5);
+                
+                // Cockpit
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.moveTo(x + width/2 - 5, y + 15);
+                ctx.lineTo(x + width - 15, y + height - 10);
+                ctx.lineTo(x + 15, y + height - 10);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Rear wing
+                ctx.fillStyle = '#FF0000';
+                ctx.fillRect(x + width/2 - 15, y + height - 25, 30, 5);
+                ctx.fillRect(x + width/2 - 20, y + height - 30, 40, 5);
+                
+                // Tires
+                ctx.fillStyle = '#222222';
+                ctx.fillRect(x - 3, y + height - 20, 6, 15);
+                ctx.fillRect(x + width - 3, y + height - 20, 6, 15);
+                ctx.fillRect(x - 3, y + height - 5, 6, 5);
+                ctx.fillRect(x + width - 3, y + height - 5, 6, 5);
+                
+                // Details
+                ctx.fillStyle = '#FF0000';
+                ctx.fillRect(x + width/2 - 2, y, 4, 10);
+            }
+            
+            // Draw realistic obstacle cars
+            function drawObstacleCar(x, y, width, height, type) {
+                if (type === 'f1') {
+                    drawF1Car(x, y, width, height);
+                } else {
+                    drawRegularCar(x, y, width, height, type);
+                }
+            }
+            
+            function lightenColor(color, percent) {
+                let num = parseInt(color.replace("#", ""), 16),
+                    amt = Math.round(2.55 * percent),
+                    R = (num >> 16) + amt,
+                    G = (num >> 8 & 0x00FF) + amt,
+                    B = (num & 0x0000FF) + amt;
+                return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1);
+            }
+            
+            function darkenColor(color, percent) {
+                let num = parseInt(color.replace("#", ""), 16),
+                    amt = Math.round(2.55 * percent),
+                    R = (num >> 16) - amt,
+                    G = (num >> 8 & 0x00FF) - amt,
+                    B = (num & 0x0000FF) - amt;
+                return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1);
+            }
+            
+            // Draw obstacles (other cars)
+            function drawObstacles() {
+                for (const obstacle of obstacles) {
+                    // Add slight horizontal movement to obstacles
+                    const sway = Math.sin(Date.now() / 500 + obstacle.x * 0.1) * 1.5;
+                    drawObstacleCar(obstacle.x + sway, obstacle.y, obstacle.width, obstacle.height, obstacle.type);
+                }
+            }
+            
+            // Draw coins
+            function drawCoins() {
+                for (const coin of coinItems) {
+                    // Gold coin with shine effect
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(coin.x + coin.radius, coin.y + coin.radius, coin.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Inner circle
+                    ctx.fillStyle = '#FFEC8B';
+                    ctx.beginPath();
+                    ctx.arc(coin.x + coin.radius, coin.y + coin.radius, coin.radius * 0.7, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Shine effect
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.beginPath();
+                    ctx.arc(coin.x + coin.radius * 1.3, coin.y + coin.radius * 0.7, coin.radius * 0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Update game state
+            function updateGame(timestamp) {
+                if (!gameRunning || gamePaused) {
+                    lastTimestamp = 0; // Reset timestamp when game is not running
+                    return;
+                }
+                
+                if (!lastTimestamp) {
+                    lastTimestamp = timestamp;
+                }
+                
+                const deltaTime = Math.min(timestamp - lastTimestamp, 100); // Cap deltaTime to prevent large jumps
+                lastTimestamp = timestamp;
+                
+                // Update road markings
+                for (const marking of roadMarkings) {
+                    marking.y += roadSpeed + (speed / 10);
+                    if (marking.y > canvas.height) {
+                        marking.y = -30;
+                    }
+                }
+                
+                // Update player position based on acceleration
+                const carSpec = carSpecs[currentCar];
+                const maxSpeed = carSpec.topSpeed / 20; // Scale down for game
+                const minSpeed = 20 / 20; // Minimum speed 20 km/h (scaled)
+
+                if (acceleration > 0) {
+                    speed += carSpec.acceleration * deltaTime / 1000;
+                    speed = Math.min(speed, maxSpeed);
+                } else {
+                    // Only decelerate if above minimum speed
+                    if (speed > minSpeed) {
+                        speed -= 0.3 * deltaTime / 1000;
+                        speed = Math.max(speed, minSpeed);
+                    }
+                }
+                
+                roadSpeed = 2 + speed / 3;
+                
+                // Update speed record
+                const currentSpeedKmh = Math.floor(speed * 20);
+                if (currentSpeedKmh > maxSpeedRecord) {
+                    maxSpeedRecord = currentSpeedKmh;
+                    localStorage.setItem('maxSpeedRecord', maxSpeedRecord);
+                }
+                
+                // Generate obstacles
+                if (Math.random() < 0.01 + speed / 500) {
+                    const obstacleTypes = ['lamborghini', 'f1', 'taxi', 'mclaren', 'jeep', 'suv'];
+                    const type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+                    
+                    const obstacleWidth = 40;
+                    const obstacleHeight = 70;
+                    let obstacleX;
+                    
+                    // Ensure obstacles don't overlap
+                    let validPosition = false;
+                    let attempts = 0;
+                    
+                    while (!validPosition && attempts < 10) {
+                        obstacleX = Math.random() * (canvas.width - obstacleWidth);
+                        validPosition = true;
+                        
+                        for (const existingObstacle of obstacles) {
+                            if (Math.abs(existingObstacle.x - obstacleX) < obstacleWidth + 20 &&
+                                existingObstacle.y < canvas.height * 0.5) {
+                                validPosition = false;
+                                break;
+                            }
+                        }
+                        
+                        attempts++;
+                    }
+                    
+                    if (validPosition) {
+                        obstacles.push({
+                            x: obstacleX,
+                            y: -obstacleHeight,
+                            width: obstacleWidth,
+                            height: obstacleHeight,
+                            type: type
+                        });
+                    }
+                }
+                
+                // Generate coins
+                if (Math.random() < 0.02) {
+                    coinItems.push({
+                        x: Math.random() * (canvas.width - 30),
+                        y: -30,
+                        radius: 12,
+                        collected: false
+                    });
+                }
+                
+                // Update obstacles
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    obstacles[i].y += roadSpeed + speed / 2;
+                    
+                    // Remove obstacles that are off screen
+                    if (obstacles[i].y > canvas.height) {
+                        obstacles.splice(i, 1);
+                    }
+                }
+                
+                // Update coins
+                for (let i = coinItems.length - 1; i >= 0; i--) {
+                    coinItems[i].y += roadSpeed + speed / 2;
+                    
+                    // Check for coin collection
+                    if (!coinItems[i].collected &&
+                        playerX < coinItems[i].x + coinItems[i].radius * 2 &&
+                        playerX + playerWidth > coinItems[i].x &&
+                        playerY < coinItems[i].y + coinItems[i].radius * 2 &&
+                        playerY + playerHeight > coinItems[i].y) {
+                        
+                        coins++;
+                        coinItems[i].collected = true;
+                        coinsDisplay.textContent = `Coins: ${coins}`;
+                        localStorage.setItem('coins', coins);
+                        
+                        // Create coin collection animation
+                        const coinAnim = document.createElement('div');
+                        coinAnim.className = 'coin-animation';
+                        coinAnim.textContent = '+1';
+                        coinAnim.style.left = `${coinItems[i].x}px`;
+                        coinAnim.style.top = `${coinItems[i].y}px`;
+                        document.getElementById('game-container').appendChild(coinAnim);
+                        
+                        setTimeout(() => {
+                            if (coinAnim.parentNode) {
+                                document.getElementById('game-container').removeChild(coinAnim);
+                            }
+                        }, 1000);
+                    }
+                    
+                    // Remove coins that are off screen or collected
+                    if (coinItems[i].y > canvas.height || coinItems[i].collected) {
+                        coinItems.splice(i, 1);
+                    }
+                }
+                
+                // Check for collisions - more lenient collision detection
+                for (const obstacle of obstacles) {
+                    // More lenient collision detection with 20% margin
+                    if (playerX + playerWidth * 0.2 < obstacle.x + obstacle.width * 0.8 &&
+                        playerX + playerWidth * 0.8 > obstacle.x + obstacle.width * 0.2 &&
+                        playerY + playerHeight * 0.2 < obstacle.y + obstacle.height * 0.8 &&
+                        playerY + playerHeight * 0.8 > obstacle.y + obstacle.height * 0.2) {
+                        
+                        gameOver();
+                        return;
+                    }
+                }
+                
+                // Update score based on speed and multiplier
+                score += Math.floor(speed * deltaTime / 50) * carSpec.scoreMultiplier;
+                
+                // Update high score if needed
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('highScore', highScore);
+                }
+                
+                updateScore();
+                
+                // Draw everything
+                draw();
+                
+                // Continue animation - always request a new frame
+                animationId = requestAnimationFrame(updateGame);
+            }
+            
+            // Draw everything
+            function draw() {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                drawRoad();
+                drawObstacles();
+                drawCoins();
+                drawPlayerCar();
+            }
+            
+            // Update score display
+            function updateScore() {
+                scoreDisplay.textContent = `Score: ${score}`;
+                highScoreDisplay.textContent = `High: ${highScore}`;
+                speedDisplay.textContent = `Speed: ${Math.floor(speed * 20)} km/h`;
+            }
+            
+            // Start game
+            function startGame() {
+                initGame();
+                gameRunning = true;
+                gamePaused = false;
+                startScreen.classList.add('hidden');
+                pauseScreen.classList.add('hidden');
+                gameoverScreen.classList.add('hidden');
+                garageScreen.classList.add('hidden');
+                lastTimestamp = 0;
+                
+                // Make sure to cancel any existing animation frame
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                animationId = requestAnimationFrame(updateGame);
+            }
+            
+            // Pause game
+            function pauseGame() {
+                if (!gameRunning) return;
+                gamePaused = true;
+                pauseScreen.classList.remove('hidden');
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+            }
+            
+            // Resume game
+            function resumeGame() {
+                if (!gameRunning) return;
+                gamePaused = false;
+                pauseScreen.classList.add('hidden');
+                lastTimestamp = 0;
+                
+                // Make sure to cancel any existing animation frame
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                animationId = requestAnimationFrame(updateGame);
+            }
+            
+            // Game over
+            function gameOver() {
+                gameRunning = false;
+                gameoverScreen.classList.remove('hidden');
+                finalScore.textContent = score;
+                finalHighScore.textContent = highScore;
+                speedRecord.textContent = `${maxSpeedRecord} km/h`;
+                coinsCollected.textContent = coins;
+                
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+            }
+            
+            // Show garage
+            function showGarage() {
+                startScreen.classList.add('hidden');
+                gameoverScreen.classList.add('hidden');
+                updateGarageUI();
+                garageScreen.classList.remove('hidden');
+            }
+            
+            // Update garage UI
+            function updateGarageUI() {
+                const carOptions = document.querySelectorAll('.car-option');
+                carOptions.forEach(option => {
+                    const carType = option.dataset.car;
+                    
+                    // Remove all selection and unlock classes
+                    option.classList.remove('selected', 'unlocked');
+                    
+                    if (carType === currentCar) {
+                        option.classList.add('selected');
+                        option.querySelector('.car-price').textContent = 'SELECTED';
+                    } else if (localStorage.getItem(`car_${carType}_unlocked`) || carType === 'dodge') {
+                        option.classList.add('unlocked');
+                        option.querySelector('.car-price').textContent = 'SELECT';
+                    } else {
+                        option.classList.add('locked');
+                        const price = carSpecs[carType].price;
+                        option.querySelector('.car-price').textContent = `${price} coins`;
+                    }
+                });
+            }
+            
+            // Hide garage
+            function hideGarage() {
+                garageScreen.classList.add('hidden');
+                if (gameRunning) {
+                    // If game was running when garage was opened, don't show start screen
+                } else {
+                    startScreen.classList.remove('hidden');
+                }
+            }
+            
+            // Purchase or select car
+            function handleCarSelection(carType) {
+                if (carType === currentCar) return;
+                
+                if (carType === 'dodge' || localStorage.getItem(`car_${carType}_unlocked`)) {
+                    // Select already unlocked car
+                    currentCar = carType;
+                    localStorage.setItem('currentCar', currentCar);
+                    updateGarageUI();
+                    updateCarDisplay();
+                } else {
+                    // Try to purchase car
+                    const price = carSpecs[carType].price;
+                    if (coins >= price) {
+                        coins -= price;
+                        localStorage.setItem('coins', coins);
+                        localStorage.setItem(`car_${carType}_unlocked`, 'true');
+                        currentCar = carType;
+                        localStorage.setItem('currentCar', currentCar);
+                        coinsDisplay.textContent = `Coins: ${coins}`;
+                        
+                        // Show purchase feedback
+                        purchaseFeedback.classList.remove('hidden');
+                        setTimeout(() => {
+                            purchaseFeedback.classList.add('hidden');
+                        }, 2000);
+                        
+                        updateGarageUI();
+                        updateCarDisplay();
+                    }
+                }
+            }
+            
+            // Handle touch events for swiping
+            function handleTouchStart(e) {
+                if (!gameRunning || gamePaused) return;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                e.preventDefault();
+            }
+            
+            function handleTouchMove(e) {
+                if (!gameRunning || gamePaused || !touchStartX) return;
+                
+                const touchX = e.touches[0].clientX;
+                const touchY = e.touches[0].clientY;
+                
+                const diffX = touchX - touchStartX;
+                
+                // Only process if primarily horizontal movement
+                if (Math.abs(diffX) > 10) {
+                    playerX += diffX * 0.5;
+                    
+                    // Keep player within canvas bounds
+                    playerX = Math.max(0, Math.min(canvas.width - playerWidth, playerX));
+                    
+                    touchStartX = touchX;
+                }
+                
+                e.preventDefault();
+            }
+            
+            function handleTouchEnd() {
+                touchStartX = 0;
+                touchStartY = 0;
+            }
+            
+            // Prevent context menu on accelerator button
+            function preventContextMenu(e) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Event listeners
+            startBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', pauseGame);
+            resumeBtn.addEventListener('click', resumeGame);
+            restartBtn.addEventListener('click', startGame);
+            playagainBtn.addEventListener('click', startGame);
+            garageBtn.addEventListener('click', showGarage);
+            garageAfterGameBtn.addEventListener('click', showGarage);
+            backBtn.addEventListener('click', hideGarage);
+            
+            // Car selection
+            document.querySelectorAll('.car-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    handleCarSelection(option.dataset.car);
+                });
+            });
+            
+            // Prevent text selection on accelerator button
+            acceleratorBtn.addEventListener('contextmenu', preventContextMenu);
+            acceleratorBtn.addEventListener('selectstart', preventContextMenu);
+            
+            // Touch controls for swiping
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd);
+            canvas.addEventListener('touchcancel', handleTouchEnd);
+            
+            // Accelerator button
+            acceleratorBtn.addEventListener('touchstart', (e) => {
+                acceleration = carSpecs[currentCar].acceleration;
+                e.preventDefault();
+            }, { passive: false });
+            
+            acceleratorBtn.addEventListener('touchend', () => {
+                acceleration = 0;
+            });
+            
+            acceleratorBtn.addEventListener('touchcancel', () => {
+                acceleration = 0;
+            });
+            
+            // Keyboard controls for testing on desktop
+            document.addEventListener('keydown', (e) => {
+                if (!gameRunning || gamePaused) return;
+                
+                if (e.key === 'ArrowLeft') {
+                    playerX = Math.max(0, playerX - 20);
+                } else if (e.key === 'ArrowRight') {
+                    playerX = Math.min(canvas.width - playerWidth, playerX + 20);
+                } else if (e.key === 'ArrowUp') {
+                    acceleration = carSpecs[currentCar].acceleration;
+                } else if (e.key === 'p' || e.key === 'P') {
+                    pauseGame();
+                }
+            });
+            
+            document.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowUp') {
+                    acceleration = 0;
+                }
+            });
+            
+            // Initialize on window resize
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Load saved data
+            highScoreDisplay.textContent = `High: ${highScore}`;
+            coinsDisplay.textContent = `Coins: ${coins}`;
+            maxSpeedRecord = parseInt(localStorage.getItem('maxSpeedRecord')) || 0;
+            
+            // Check if cars are unlocked
+            if (!localStorage.getItem('car_dodge_unlocked')) {
+                localStorage.setItem('car_dodge_unlocked', 'true');
+            }
+            
+            // Initial setup
+            initGame();
+            draw();
+        });
+    </script>
+</body>
+</html>            height: 80vh;
             max-height: 700px;
             overflow: hidden;
             border-radius: 12px;
